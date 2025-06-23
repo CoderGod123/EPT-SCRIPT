@@ -1,0 +1,88 @@
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local function unleashChaos()
+    local humanoidRootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+
+    local cashStats = LocalPlayer:FindFirstChild("leaderstats") and (LocalPlayer.leaderstats:FindFirstChild("Cash") or LocalPlayer.leaderstats:FindFirstChild("Money"))
+    local originalCash = cashStats and cashStats.Value or 0
+
+    local function spamTouch(part)
+        if part then
+            humanoidRootPart.CFrame = part.CFrame
+            firetouchinterest(humanoidRootPart, part, 0)
+            task.wait(0.01)
+            firetouchinterest(humanoidRootPart, part, 1)
+        end
+    end
+
+    local function cloneAndCollect(parent)
+        for _, obj in pairs(parent:GetDescendants()) do
+            if obj:IsA("BasePart") and (obj.Name:lower():match("cash") or obj.Name:lower():match("money") or obj.Name:lower():match("drop")) then
+                local clone = obj:Clone()
+                clone.Position = humanoidRootPart.Position
+                clone.Parent = Workspace
+                clone.Anchored = false
+                spamTouch(clone)
+                clone:Destroy()
+                task.wait(0.01)
+            end
+        end
+    end
+
+    local function exploitInteractables()
+        for _, part in pairs(Workspace:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local isTarget = part.Name:lower():match("button") or part.Name:lower():match("dropper") or part.Name:lower():match("upgrade") or part.Name:lower():match("rebirth")
+                if isTarget then
+                    spamTouch(part)
+                end
+            end
+        end
+    end
+
+    local function overflowStats()
+        if cashStats then
+            while true do
+                cashStats.Value = cashStats.Value + 999999999999
+                cashStats.Value = cashStats.Value - (-999999999999)
+                task.wait(0.1)
+            end
+        end
+    end
+
+    local function spamRemotes()
+        for _, obj in pairs(ReplicatedStorage:GetChildren()) do
+            if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                while true do
+                    obj:FireServer(999999999999, LocalPlayer, {Cash = 99999999999999})
+                    task.wait(0.01)
+                end
+            end
+        end
+    end
+
+    local function fakePurchases()
+        for _, part in pairs(Workspace:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name:lower():match("buy") then
+                spamTouch(part)
+            end
+        end
+    end
+
+    while true do
+        cloneAndCollect(Workspace)
+        exploitInteractables()
+        overflowStats()
+        spamRemotes()
+        fakePurchases()
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(math.random(-50, 50), 0, math.random(-50, 50))
+        task.wait(0.05)
+    end
+end
+
+unleashChaos()
